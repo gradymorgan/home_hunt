@@ -1,0 +1,13 @@
+#! /bin/bash
+
+mkdir -p tmp
+
+rm data/neighborhood.json data/parcels.json
+
+curl 'ftp://ftp.kingcounty.gov/gis/Web/GISData/neighborhood_SHP.zip' -o tmp/neighborhood_SHP.zip
+unzip -d tmp/ tmp/neighborhood_SHP.zip
+ogr2ogr -f GeoJSON -t_srs EPSG:4326 data/neighborhood.json tmp/neighborhood/neighborhood.shp
+
+curl 'ftp://ftp.kingcounty.gov/gis/Web/GISData/parcel_address_SHP.zip' -o tmp/parcel_address_SHP.zip
+unzip -d tmp/ tmp/parcel_address_SHP.zip
+ogr2ogr -f GeoJSON -where "ZIP5 IN ('98119', '98109')" -t_srs EPSG:4326 data/parcels.json tmp/parcel_address/parcel_address.shp
