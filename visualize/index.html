@@ -60,7 +60,15 @@ svg.append("path")
     .attr("d", path)
     .attr("class", "neighborhood")
 
-d3.json("../data/parcels.json", function(error, parcels) {
+
+var color = d3.scale.threshold()
+    .domain([500000, 800000, 1000000])
+    .range(["green", "yellow", "red"]);
+
+
+d3.json("../data/parcels2.json", function(error, parcels) {
+//TODO: filter parcels
+
   if (error) return console.error(error);
 
   window.parcels = parcels;
@@ -71,7 +79,16 @@ d3.json("../data/parcels.json", function(error, parcels) {
     .data(parcels.features)
   .enter().append("path")
     .attr("class", function(d) { return "parcel p" + d.properties.PIN; })
-    .attr("d", path);
+    .attr("d", path)
+    .style("fill", function(d) { 
+      if (d.properties.SALE_STATUS == "Active")
+        return "blue"; 
+      if (d.properties.SALE_STATUS == "Pending")
+        return "cyan"; 
+      if (d.properties.SALE_STATUS == "Sold")
+        return color(d.properties.SALE_PRICE); 
+    });
+    
 
 });
 
