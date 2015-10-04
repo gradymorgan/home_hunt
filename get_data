@@ -11,3 +11,6 @@ ogr2ogr -f GeoJSON -t_srs EPSG:4326 data/neighborhood.json tmp/neighborhood/neig
 curl 'ftp://ftp.kingcounty.gov/gis/Web/GISData/parcel_address_SHP.zip' -o tmp/parcel_address_SHP.zip
 unzip -d tmp/ tmp/parcel_address_SHP.zip
 ogr2ogr -f GeoJSON -where "ZIP5 IN ('98119', '98109')" -t_srs EPSG:4326 data/parcels.json tmp/parcel_address/parcel_address.shp
+
+
+#ftp://ftp.kingcounty.gov/gis/Web/GISData/roadlog_SHP.zip

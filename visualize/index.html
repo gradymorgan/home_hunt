@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <style>
   body {
+      font-family: Helvetica;
       margin: .5in;
       width: 30in;
       height: 40in;
@@ -30,11 +31,66 @@
     width: 29in;
     height: 39in;
   }
+
+  .legend {
+    width: 200px;
+    height: 75px;
+    position: fixed;
+    border: 1px solid #ddd;
+    background: #fff;
+    padding: 6px;
+  }
+
+  .color { color: #fff; font-weight: bold; text-align: center; }
+  .c55 { background-color: #0042F9 }
+  .c65 { background-color: #6CF83A }
+  .c75 { background-color: #DFF73B }
+  .c85 { background-color: #FF9300 }
+  .c100 { background-color: #FF2600 }
+
+
+  .d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
   </style>
 </head>
 <body>
+
+  <div class="legend">
+    <div class="color c55">$550,000</div>
+    <div class="color c65">$650,000</div>
+    <div class="color c75">$750,000</div>
+    <div class="color c85">$850,000</div>
+    <div class="color c100">$1,000,000</div>
+  </div>
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
   <script>
 
 var width = 2784,
@@ -73,30 +129,51 @@ svg.append("path")
     .attr("class", "neighborhood")
 
 var color = d3.scale.threshold()
-    .domain([500000, 600000, 700000, 800000, 900000, 1000000])
-    .range(["#f2f0f7", "#dadaeb", "#bcbddc", "#9e9ac8", "#756bb1", "#54278f"]);
+    .domain([550000, 650000, 750000, 850000, 1000000])
+    .range(["#0042F9", "#6CF83A", "#DFF73B", "#FF9300", "#FF2600"]);
 
+//olympic lat: 47.626769
+
+
+//tooltip
+var dollars = d3.format("$,");
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    if ( !d.properties.SALE_PRICE ) return;
+
+    return "<strong>Sold:  </strong>" + dollars(d.properties.SALE_PRICE) + "&nbsp;" + d.properties.SALE_DATE.split(' ')[0];
+  });
+
+svg.call(tip);
 
 d3.json("../data/parcels2.json", function(error, parcels) {
-  if (error) return console.error(error);
+    if (error) return console.error(error);
 
-  window.parcels = parcels;
+    window.parcels = parcels;
 
-  svg.selectAll(".parcel")
-    .data(parcels.features)
-  .enter().append("path")
-    .attr("class", function(d) { return "parcel p" + d.properties.PIN; })
-    .attr("d", path)
-    .style("fill", function(d) { 
-      if (d.properties.SALE_STATUS == "Active")
-        return "blue"; 
-      if (d.properties.SALE_STATUS == "Pending")
-        return "cyan"; 
-      if (d.properties.SALE_STATUS == "Sold")
-        return color(d.properties.SALE_PRICE); 
-    });
-    
-
+    svg.selectAll(".parcel")
+      .data(parcels.features)
+      .enter().append("path")
+      .attr("class", function(d) { return "parcel p" + d.properties.PIN; })
+      .attr("d", path)
+      .style("fill", function(d) { 
+        if (d.properties.SALE_STATUS == "Active")
+          return "white"; 
+        if (d.properties.SALE_STATUS == "Pending")
+          return "white"; 
+        if (d.properties.SALE_STATUS == "Sold")
+          return color(d.properties.SALE_PRICE); 
+      })
+      .style("stroke", function(d) {
+        if (d.properties.SALE_STATUS == "Active" ) 
+            return "red"
+        if (d.properties.SALE_STATUS == "Pending")
+            return "orange"
+      })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide)
 });
 
   </script>
